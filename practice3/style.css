@@ -1,0 +1,32 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: white;
+}
+html,body{
+    height: 100%;
+    width: 100%;
+}
+body{
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   
+}
+#cursor{
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background-color: rgb(231, 224, 224);
+    position: absolute;
+    transition: all ease 0.2s;
+    mix-blend-mode: difference;
+}
+#main h1 {
+    font-size: 130px;
+    font-weight: 900;
+}

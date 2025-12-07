@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Quiz Website</title>
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+        body{
+            background:linear-gradient(135deg,#6C63FF,#A26BFF);
+            min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;
+        }
+
+        /* Landing Page */
+        .landing-page{
+            width:100%;max-width:480px;background:white;padding:40px 30px;border-radius:20px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.25);text-align:center;animation:fadeIn .8s;
+        }
+        @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+        .main-title{font-size:2.2rem;font-weight:bold;margin-bottom:10px;color:#333;}
+        .subtitle{font-size:1rem;color:#555;margin-bottom:25px;}
+
+        .input-name{padding:12px;width:100%;border-radius:10px;border:1px solid #ccc;margin-bottom:20px;}
+
+        .categories{display:flex;flex-direction:column;gap:15px;}
+        .cat-card{
+            padding:15px;border:none;border-radius:15px;background:#716eb1;color:white;font-size:1.1rem;
+            cursor:pointer;box-shadow:0 5px 15px rgba(0,0,0,0.15);transition:0.25s;
+        }
+        .cat-card:hover{transform:scale(1.04);background:#9692dd;}
+
+        /* Quiz */
+        .quiz{display:none;width:100%;max-width:450px;background:white;padding:25px;border-radius:15px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .top-bar{display:flex;justify-content:space-between;margin-bottom:15px;}
+        .timer{background:#6C63FF;color:white;padding:6px 12px;border-radius:10px;}
+
+        .question-box{font-size:1.1rem;color:#333;margin-bottom:20px;}
+        .options{display:flex;flex-direction:column;gap:10px;}
+        .option{padding:12px;border-radius:10px;background:#f1f1ff;cursor:pointer;}
+        .option:hover{background:#e0dfff;}
+
+        .controls{margin-top:20px;display:flex;justify-content:space-between;}
+        .btn{padding:10px 20px;border:none;border-radius:10px;cursor:pointer;font-size:1rem;}
+        .prev{background:#ddd;}
+        .next{background:#6C63FF;color:white;}
+
+        /* Result */
+        .result{display:none;width:100%;max-width:450px;background:white;padding:25px;border-radius:15px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.2);text-align:center;
+        }
+
+        .celebration{font-size:2rem;margin-bottom:15px;color:#FFD700;display:none;}
+    </style>
+</head>
+<body>
+
+<!-- LANDING PAGE -->
+<div class="landing-page" id="landing">
+    <h1 class="main-title">Quiz Zone</h1>
+    <p class="subtitle">Enter your name and choose a category</p>
+
+    <input type="text" id="username" class="input-name" placeholder="Enter your name" />
+
+    <div class="categories">
+        <button class="cat-card" onclick="startQuiz('gk')">🧠 General Knowledge</button>
+        <button class="cat-card" onclick="startQuiz('sports')">🏅 Sports</button>
+        <button class="cat-card" onclick="startQuiz('science')">🔬 Science</button>
+    </div>
+</div>
+
+<!-- QUIZ SECTION -->
+<div class="quiz" id="quizSection">
+    <div class="top-bar">
+        <div id="timer" class="timer">30s</div>
+    </div>
+
+    <div class="question-box" id="question"></div>
+    <div class="options" id="options"></div>
+
+    <div class="controls">
+        <button class="btn prev" onclick="prevQuestion()">Previous</button>
+        <button class="btn next" onclick="nextQuestion()">Next</button>
+    </div>
+</div>
+
+<!-- RESULT PAGE -->
+<div class="result" id="resultSection">
+    <div id="celebrate" class="celebration">🎉</div>
+    <h1 id="greet"></h1>
+    <h2 id="score"></h2>
+    <button class="cat-card" onclick="location.reload()">Try Again</button>
+</div>
+
+<script>
+    let user = "";
+
+    const questionBank = {
+        gk:[
+            {q:"Capital of India?",options:["Mumbai","Kolkata","New Delhi","Pune"],ans:2},
+            {q:"National animal?",options:["Tiger","Lion","Elephant","Leopard"],ans:0},
+            {q:"National bird?",options:["Crow","Peacock","Sparrow","Pigeon"],ans:1},
+            {q:"Who wrote Ramayana?",options:["Valmiki","Tulsidas","Vyas","Kabir"],ans:0},
+            {q:"Largest country?",options:["USA","Russia","China","India"],ans:1},
+            {q:"Fastest animal?",options:["Cheetah","Tiger","Horse","Leopard"],ans:0},
+            {q:"National flower?",options:["Lotus","Rose","Lily","Jasmine"],ans:0},
+            {q:"PM of India?",options:["Modi","Rahul","Yogi","Shah"],ans:0},
+            {q:"2+2= ?",options:["2","3","4","5"],ans:2},
+            {q:"Red planet?",options:["Earth","Mars","Venus","Jupiter"],ans:1}
+        ],
+
+        sports:[
+            {q:"Players in cricket team?",options:["10","11","12","9"],ans:1},
+            {q:"Football played with?",options:["Bat","Racket","Ball","Stick"],ans:2},
+            {q:"Olympics held every?",options:["2 yrs","3 yrs","4 yrs","5 yrs"],ans:2},
+            {q:"Cricket god?",options:["Dhoni","Kohli","Sachin","Rohit"],ans:2},
+            {q:"FIFA last winner?",options:["France","Argentina","Brazil","Spain"],ans:1},
+            {q:"Hockey is national game of?",options:["India","China","Japan","USA"],ans:0},
+            {q:"Tennis court color?",options:["Green","Orange","Red","Blue"],ans:0},
+            {q:"Badminton uses?",options:["Ball","Shuttle","Disc","Stick"],ans:1},
+            {q:"Cricket overs?",options:["20","45","30","10"],ans:0},
+            {q:"NBA is for?",options:["Cricket","Basketball","Hockey","Kabaddi"],ans:1}
+        ],
+
+        science:[
+            {q:"H2O is?",options:["Oxygen","Water","Hydrogen","Carbon"],ans:1},
+            {q:"Earth is a?",options:["Star","Planet","Gas ball","Stone"],ans:1},
+            {q:"Sun rises in?",options:["North","West","East","South"],ans:2},
+            {q:"Humans breathe?",options:["CO2","O2","H2","N2"],ans:1},
+            {q:"Boiling point of water?",options:["50°C","100°C","80°C","150°C"],ans:1},
+            {q:"Smallest unit?",options:["Atom","Cell","Molecule","Organ"],ans:1},
+            {q:"Electricity unit?",options:["Volt","Amp","Watt","Ohm"],ans:2},
+            {q:"Sun is a?",options:["Planet","Star","Rock","Gas"],ans:1},
+            {q:"Blood color?",options:["Red","Blue","Green","Black"],ans:0},
+            {q:"Gravity discovered by?",options:["Newton","Einstein","Galileo","Raman"],ans:0}
+        ]
+    };
+
+    let quiz=[],index=0,score=0,timer=30,timerInterval;
+
+    function startQuiz(type){
+        user = document.getElementById("username").value;
+        if(user.trim()==""){
+            alert("Please enter your name first!");
+            return;
+        }
+
+        quiz = questionBank[type];
+
+        document.getElementById("landing").style.display="none";
+        document.getElementById("quizSection").style.display="block";
+
+        startTimer();
+        showQuestion();
+    }
+
+    function startTimer(){
+        timerInterval=setInterval(()=>{
+            timer--;
+            document.getElementById("timer").innerText = timer+"s";
+            if(timer<=0){ finishQuiz(); }
+        },1000);
+    }
+
+    function showQuestion(){
+        let q = quiz[index];
+        document.getElementById("question").innerText = q.q;
+        let optBox = document.getElementById("options");
+        optBox.innerHTML = "";
+
+        q.options.forEach((o,i)=>{
+            let div=document.createElement("div");
+            div.className="option";
+            div.innerText=o;
+            div.onclick=()=>selectOption(i);
+            optBox.appendChild(div);
+        });
+    }
+
+    function selectOption(i){
+        if(i === quiz[index].ans) score++;
+        nextQuestion();
+    }
+
+    function nextQuestion(){
+        if(index < quiz.length-1){ index++; showQuestion(); }
+        else finishQuiz();
+    }
+
+    function prevQuestion(){
+        if(index>0){ index--; showQuestion(); }
+    }
+
+    function finishQuiz(){
+        clearInterval(timerInterval);
+        document.getElementById("quizSection").style.display="none";
+        document.getElementById("resultSection").style.display="block";
+
+        document.getElementById("greet").innerText = `Well done, ${user}!`;
+        document.getElementById("score").innerText = `Your Score: ${score} / ${quiz.length}`;
+
+        if(score > 10){
+            document.getElementById("celebrate").style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>
